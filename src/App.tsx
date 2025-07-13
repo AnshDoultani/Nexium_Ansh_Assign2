@@ -1,4 +1,3 @@
-import React from 'react';
 import { BlogSummarizer } from './components/BlogSummarizer';
 import { Toaster } from '@/components/ui/sonner';
 import './App.css';
