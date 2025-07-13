@@ -5,6 +5,13 @@ Users can enter a blog URL, which is scraped, summarized, translated to Urdu, an
 
 ---
 
+## 🌐 Live Demo
+
+Deployed on Vercel:  
+👉 [nexium-ansh-assign2-auri.vercel.app](nexium-ansh-assign2-auri.vercel.app)
+
+---
+
 ## Project Flow
 
 ### Step-by-step Flow:
