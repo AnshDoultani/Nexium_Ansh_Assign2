@@ -1,0 +1,217 @@
+{
+  "name": "Blog Summariser",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "a4a5a902-3ce9-4421-a9c2-0682a272d7a7",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -340,
+        60
+      ],
+      "id": "545bb263-dcf3-4089-a5dc-c1f1bf171817",
+      "name": "Webhook",
+      "webhookId": "a4a5a902-3ce9-4421-a9c2-0682a272d7a7"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"summary\": \"{{ $json.summary }}\",\n  \"urduSummary\": \"{{ $json.translatedText }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        500,
+        60
+      ],
+      "id": "3829a63d-269c-473a-9521-5a78eb5be004",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "url": "https://app.scrapingbee.com/api/v1",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "Q57BPK6XQL78K9DF4K1UQLR0NXBXSZ5H6GX3MM22R0QXXHY6B9N9UEZGHIITRATW2I31DOF0AG1VX1SQ"
+            },
+            {
+              "name": "url",
+              "value": "={{ $json.body.url }}"
+            },
+            {
+              "name": "ai_extract_rules",
+              "value": "{\n    \"summary\" : \"one paragraph summary of blog\"\n  }"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -140,
+        60
+      ],
+      "id": "ff40dda5-0140-4c73-b4c9-d868b2387afa",
+      "name": "Scrapper and Sumarizer"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "text": "={{ $json.summary }}",
+        "translateTo": "ur"
+      },
+      "type": "n8n-nodes-base.googleTranslate",
+      "typeVersion": 2,
+      "position": [
+        80,
+        60
+      ],
+      "id": "0c8946ab-fa05-411f-b1d4-d29ec5f91df4",
+      "name": "Translate to urdu",
+      "credentials": {
+        "googleApi": {
+          "id": "Lw1vRVYlx0YVNIKc",
+          "name": "Google Translate account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4e612953-5f2b-4422-aa4d-987b68706753",
+              "name": "summary",
+              "value": "={{ $('Scrapper and Sumarizer').item.json.summary }}",
+              "type": "string"
+            },
+            {
+              "id": "fbcc1b51-1e31-47fa-b97e-1f89d02f04d4",
+              "name": "translatedText",
+              "value": "={{ $json.translatedText }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        300,
+        60
+      ],
+      "id": "30d903a7-aa13-4239-acba-6fcf4f6a1c4b",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "tableId": "summary",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "summary",
+              "fieldValue": "={{ $json.summary }}"
+            },
+            {
+              "fieldId": "url",
+              "fieldValue": "={{ $('Webhook').item.json.body.url }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        80,
+        240
+      ],
+      "id": "ed4eba0d-a09a-4a40-bf93-fbc08e9f4e32",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "y4cAqxjmDUwWFy6s",
+          "name": "Supabase account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Scrapper and Sumarizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "Scrapper and Sumarizer": {
+      "main": [
+        [
+          {
+            "node": "Translate to urdu",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Translate to urdu": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "787f1fec-e74b-4d41-9fbe-78cc60704a7a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7814a450f42874c3c47c07d5497e00dcb28e0c30859e7a51a89a01a9aa42bd14"
+  },
+  "id": "MTWS9t4FQaPUtaHl",
+  "tags": []
+}
